@@ -1,0 +1,54 @@
+<!-- ============================================================
+     Custom Wazuh detection rules - SOC SIEM lab (Armi Fahim)
+     Custom rule IDs use the 100000+ range reserved for user rules.
+     ============================================================ -->
+
+<!-- Default example shipped with Wazuh (kept for reference) -->
+<group name="local,syslog,sshd,">
+  <rule id="100001" level="5">
+    <if_sid>5716</if_sid>
+    <srcip>1.1.1.1</srcip>
+    <description>sshd: authentication failed from IP 1.1.1.1.</description>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+</group>
+
+<!-- ============================================================
+     CUSTOM DETECTION 1: certutil.exe abused to download a file.
+     certutil is a TRUSTED built-in Windows tool, but attackers abuse
+     it to quietly fetch malware ("living off the land"). We hook onto
+     Wazuh rule 61603 (Sysmon Event 1 = a process started) and raise a
+     HIGH alert when certutil runs with the download flag "urlcache".
+     MITRE T1105 - Ingress Tool Transfer.
+     ============================================================ -->
+<group name="custom_detections,sysmon,">
+  <rule id="100100" level="12">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image">certutil</field>
+    <field name="win.eventdata.commandLine">urlcache</field>
+    <description>CUSTOM: certutil.exe used to download a file (LOLBin abuse)</description>
+    <mitre>
+      <id>T1105</id>
+    </mitre>
+    <group>lolbin,attack,</group>
+  </rule>
+</group>
+
+<!-- ============================================================
+     CUSTOM TUNING 1: silence a known false positive.
+     Wazuh rule 92213 ("Executable file dropped in folder commonly
+     used by malware", level 15) fires every time PowerShell runs,
+     because PowerShell drops a tiny "__PSScriptPolicyTest_*.ps1"
+     file in %TEMP% to check its execution policy, then deletes it.
+     That is benign. This child rule overrides 92213 for that exact
+     filename and sets level 0 = do not alert. This is how an analyst
+     keeps the queue clean after triaging a false positive.
+     ============================================================ -->
+<group name="custom_tuning,sysmon,">
+  <rule id="100200" level="0">
+    <if_sid>92213</if_sid>
+    <field name="win.eventdata.targetFilename">__PSScriptPolicyTest_</field>
+    <description>Benign PowerShell script-policy test file - false positive silenced</description>
+    <group>false_positive,</group>
+  </rule>
+</group>
