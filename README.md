@@ -13,6 +13,10 @@ the rule-engine projects:
 - **Suricata** rules -> network detection
 - **Wazuh (this project)** -> the platform that collects, correlates, alerts on, and visualises it all.
 
+![Wazuh Threat Hunting dashboard showing alert volume, top rules and MITRE ATT&CK trends](screenshots/threat-hunting-overview.png)
+
+*The Wazuh dashboard (Threat Hunting) — live alert volume, top detection rules, and MITRE ATT&CK coverage for the monitored endpoint.*
+
 ---
 
 ## What this project demonstrates
@@ -49,6 +53,10 @@ the rule-engine projects:
 The endpoint is a **sensor**; the manager **analyses & alerts**; the indexer
 **stores & searches**; the dashboard **visualises**.
 
+![Wazuh agent ACERNITRO5 connected and active](screenshots/agent-active.png)
+
+*The Windows endpoint (ACERNITRO5) onboarded as an agent and reporting as **Active**.*
+
 ---
 
 ## Detection engineering
@@ -65,6 +73,18 @@ the 100000+ user range).
 It hooks onto Wazuh's base Sysmon process-creation rule (`61603`) and matches on
 the process image (`certutil`) plus the download flag (`urlcache`).
 
+![Custom rule 100100 firing on certutil activity at level 12, MITRE T1105](screenshots/custom-rule-100100-fired.png)
+
+*Rule 100100 firing end-to-end — certutil activity on ACERNITRO5 caught at **level 12** and tagged **MITRE T1105**.*
+
+![Expanded alert detail for rule 100100](screenshots/custom-rule-100100-detail.png)
+
+*The expanded alert: full command line, rule metadata, and ATT&CK mapping.*
+
+![Custom rules 100100 and 100200 in the Wazuh ruleset](screenshots/custom-rules.png)
+
+*Both custom rules deployed and visible in the Wazuh ruleset (Server Management → Rules).*
+
 ### Custom tuning rule (false-positive suppression)
 
 | Rule ID | Level | Action | Why |
@@ -77,6 +97,10 @@ the process image (`certutil`) plus the download flag (`urlcache`).
 - **PowerShell-spawned discovery** - T1059.001
 - **SCA** - CIS Microsoft Windows 11 Benchmark compliance scan
 - Automatic mapping to **PCI DSS, NIST, HIPAA, GDPR**
+
+![CIS Microsoft Windows 11 benchmark results from Wazuh SCA](screenshots/sca-cis-benchmark.png)
+
+*Built-in Security Configuration Assessment scoring the endpoint against the CIS Microsoft Windows 11 benchmark.*
 
 ---
 
